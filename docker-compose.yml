@@ -11,7 +11,7 @@ services:
       - /workspaces:/workspaces
       - ${PWD}:${PWD}:cached
       - /dev:/dev
-      - vscode-store:/vscode
+      - vscode:/vscode
     working_dir: ${PWD}
     ports:
       - 22022:22
@@ -86,6 +86,6 @@ services:
         aliases:
           - consumer
 volumes:
-  vscode-store:
+  vscode:
     external: true
-    name: vscode-store
+    name: vscode

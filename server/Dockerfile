@@ -5,6 +5,7 @@ RUN apt-get update && apt-get install -y \
     bash-completion \
     curl \
     git \
+    btop \
     htop \
     jq \
     make \
@@ -16,6 +17,7 @@ RUN apt-get update && apt-get install -y \
     socat \
     sudo \
     tini \
+    tmux \
     tree \
     unzip \
     vim \
