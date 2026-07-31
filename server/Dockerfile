@@ -1,3 +1,20 @@
+ARG debian=dbndev/vegito-public:trixie-debian-golang-latest
+FROM ${debian} AS go-build
+ARG debian_version=trixie
+ARG TARGETPLATFORM
+
+ARG uid=1000
+ARG gid=1000
+ARG go_pkg=/home/debian/go/pkg
+ARG go_cache=/home/debian/.cache/go-build
+ENV GOMODCACHE=${go_pkg}/mod
+ENV GOCACHE=${go_cache}
+ENV GOBIN=/home/debian/go/bin
+ENV CGO_ENABLED=0
+RUN --mount=type=cache,id=vegito-debian-${TARGETPLATFORM}-${debian_version}-root-go-pkg,target=${go_pkg},sharing=locked,uid=${uid},gid=${gid} \
+    --mount=type=cache,id=vegito-debian-${TARGETPLATFORM}-${debian_version}-root-go-build,target=${go_cache},sharing=locked,uid=${uid},gid=${gid} \
+    go install -v github.com/jesseduffield/lazydocker@latest
+
 FROM debian:bookworm
 
 # Mise à jour du système et installation sudo, openssh-client, openssh-server, netcat
@@ -73,3 +90,5 @@ COPY container/vscode-remote-containers-server-install.sh   /usr/local/bin/docke
 ENTRYPOINT [ "tini", "--", "docker-ssh-bridge-entrypoint.sh" ]
 CMD [ "docker-ssh-bridge-run.sh" ]
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 CMD [ "docker-ssh-bridge-healthcheck.sh" ]
+
+COPY --from=go-build /home/debian/go/bin/lazydocker /usr/local/bin/lazydocker
