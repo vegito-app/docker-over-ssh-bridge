@@ -34,6 +34,7 @@ echo sshd started: listening at localhost:22
 socat TCP-LISTEN:2375,fork UNIX-CONNECT:/var/run/docker.sock &
 bg_pids+=($!)
 
+sudo chmod o+rw /var/run/docker.sock
 
 # Create a ready flag file for healthchecks and other services to know when the AI agent is ready
 echo "{\"status\":\"ready\",\"ts\":$(date +%s)}" > /tmp/.bridge-sshd-ready
