@@ -7,18 +7,18 @@ services:
     image: ${IMAGE:-dbndev/ssh-bridge}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./authorized_keys:/home/devuser/.ssh/authorized_keys
+      - ./authorized_keys:/home/debian/.ssh/authorized_keys
       - /workspaces:/workspaces
       - ${PWD}:${PWD}:cached
       - /dev:/dev
       - vscode:/vscode
     working_dir: ${PWD}
     ports:
-      - 22022:22
-      - 23750:2375
+      - ${VEGITO_SSH_BRIDGE_PORT:-22022}:22
+      - ${VEGITO_DOCKER_BRIDGE_PORT:-23750}:2375
     container_name: ssh-server
     environment:
-      SSH_PUBLIC_KEY: /home/devuser/.ssh/authorized_keys
+      SSH_PUBLIC_KEY: /home/debian/.ssh/authorized_keys
       VSCODE_SERVER_COMMIT: ${VSCODE_SERVER_COMMIT:-93cfdd489c3b228840d0f86ec77c3636277c93ea}
       VSCODE_SERVER_ARCH: ${VSCODE_SERVER_ARCH}
 
@@ -27,7 +27,9 @@ services:
       VEGITO_DOCKER_REGISTRY_MODE: ${VEGITO_DOCKER_REGISTRY_MODE}
       VEGITO_STRIPE_DEBUG_KEY: ${VEGITO_STRIPE_DEBUG_KEY}
       VEGITO_PROJECT_USER: ${VEGITO_PROJECT_USER}
+      VEGITO_DOCKER_COMPOSE_HOST: ${VEGITO_DOCKER_COMPOSE_HOST}
       VEGITO_DOCKERHUB_USERNAME: ${VEGITO_DOCKERHUB_USERNAME}
+      VEGITO_DNS_SERVER: ${VEGITO_DNS_SERVER:-1.1.1.1}
 
     networks:
       sshbridge:
@@ -39,13 +41,13 @@ services:
     ports:
       - 23750:23750
     volumes:
-      - ${SSH_PRIVATE_KEY:-${PWD}/id_rsa}:/home/devuser/.ssh/id_rsa
+      - ${SSH_PRIVATE_KEY:-${PWD}/id_rsa}:/home/debian/.ssh/id_rsa
     environment:
       DOCKER_HOST: 0.0.0.0:23750
       SSH_DOCKER_SERVER: ${SSH_DOCKER_SERVER:-server:22}
       SSH_DOCKER_SERVER_HOST: ${SSH_DOCKER_SERVER_HOST:-server}
       SSH_DOCKER_SERVER_PORT: ${SSH_DOCKER_SERVER_PORT:-22}
-      HOME: /home/devuser
+      HOME: /home/debian
     command: |
       bash -c '
       set -eu

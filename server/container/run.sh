@@ -41,4 +41,7 @@ echo "{\"status\":\"ready\",\"ts\":$(date +%s)}" > /tmp/.bridge-sshd-ready
 
 echo "✅ sshd started successfully."
 
+# ⚠️ Not required as we have no firebase-emulators, no dockerd, do desktop-x
+# project-container-start.sh
+
 wait ${sshd_pid}

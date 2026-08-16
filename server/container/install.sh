@@ -16,12 +16,12 @@ cat ${SSH_PUBLIC_KEY}
 docker-ssh-bridge-ensure-vscode-servers.sh
 
 generate_ssh_env() {
-    local ssh_env="/home/devuser/.ssh/environment"
-    local sshd_env_conf="/etc/ssh/sshd_config.d/99-devuser-environment.conf"
+    local ssh_env="${HOME}/.ssh/environment"
+    local sshd_env_conf="/etc/ssh/sshd_config.d/99-${USER}-environment.conf"
 
-    mkdir -p /home/devuser/.ssh
-    chown devuser:devuser /home/devuser/.ssh
-    chmod 700 /home/devuser/.ssh
+    mkdir -p ${HOME}/.ssh
+    chown ${USER}:${USER} ${HOME}/.ssh
+    chmod 700 ${HOME}/.ssh
 
     {
         echo "VEGITO_DOCKER_REGISTRIES=${VEGITO_DOCKER_REGISTRIES:-}"
@@ -32,9 +32,10 @@ generate_ssh_env() {
         echo "VEGITO_DOCKERHUB_USERNAME=${VEGITO_DOCKERHUB_USERNAME:-}"
         echo "VSCODE_SERVER_ARCH=${VSCODE_SERVER_ARCH:-}"
         echo "VSCODE_SERVER_COMMIT=${VSCODE_SERVER_COMMIT:-}"
+        echo "VEGITO_DOCKER_COMPOSE_HOST=${VEGITO_DOCKER_COMPOSE_HOST:-}"
     } > "${ssh_env}"
 
-    chown devuser:devuser "${ssh_env}"
+    chown ${USER}:${USER} "${ssh_env}"
     chmod 600 "${ssh_env}"
 
     {

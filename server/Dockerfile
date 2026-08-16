@@ -1,5 +1,6 @@
-ARG debian=dbndev/vegito-public:trixie-debian-golang-latest
-FROM ${debian} AS go-build
+ARG go=dbndev/vegito-public:trixie-debian-golang-latest
+ARG debian=dbndev/vegito-public:trixie-debian-project-golang-docker-latest
+FROM ${go} AS go-build
 ARG debian_version=trixie
 ARG TARGETPLATFORM
 
@@ -15,10 +16,16 @@ RUN --mount=type=cache,id=vegito-debian-${TARGETPLATFORM}-${debian_version}-root
     --mount=type=cache,id=vegito-debian-${TARGETPLATFORM}-${debian_version}-root-go-build,target=${go_cache},sharing=locked,uid=${uid},gid=${gid} \
     go install -v github.com/jesseduffield/lazydocker@latest
 
-FROM debian:bookworm
+FROM ${debian}
 
-# Mise à jour du système et installation sudo, openssh-client, openssh-server, netcat
-RUN apt-get update && apt-get install -y \
+ARG TARGETPLATFORM
+
+USER root
+ARG debian_version=trixie
+
+RUN --mount=type=cache,id=vegito-debian-${debian_version}-${TARGETPLATFORM}-apt-cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,id=vegito-debian-${debian_version}-${TARGETPLATFORM}-apt-lib,target=/var/lib/apt,sharing=locked \
+    apt-get update && apt-get install -y \
     bash-completion \
     curl \
     git \
@@ -41,36 +48,36 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Configuration du server SSH
-RUN mkdir /var/run/sshd
+RUN mkdir -p /var/run/sshd
 
-ENV USER=devuser
+USER root
 
-# Création d'un nouvel utilisateur sans mot de passe
-RUN useradd -m ${USER} && echo "${USER}:${USER}" | chpasswd && adduser ${USER} sudo \
-    && echo "${USER} ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/devuser \
-    && chmod 0440 /etc/sudoers.d/devuser
+ARG non_root_user=dockersshbridge
+ARG uid=1000
+ARG gid=1000
 
-# Install Docker (client part)
-RUN install -m 0755 -d /etc/apt/keyrings \
-    && curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc \
-    && chmod a+r /etc/apt/keyrings/docker.asc \
-    # Add the repository to Apt sources:
-    && echo \
-    "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian bookworm stable" | \
-    tee /etc/apt/sources.list.d/docker.list > /dev/null \
-    && apt-get update && apt-get install -y \
-    # docker-ce \
-    docker-ce-cli \
-    # containerd.io \
-    # docker-buildx-plugin \
-    docker-compose-plugin
+# 👤 Rename non root user
+RUN usermod -l ${non_root_user} ${USER} \
+    && groupmod -n ${non_root_user} ${USER} \
+    && \
+    echo "${non_root_user}:${non_root_user}" | chpasswd && \
+    adduser ${non_root_user} sudo && \
+    echo "${non_root_user} ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/${non_root_user} && \
+    chmod 0440 /etc/sudoers.d/${non_root_user}
+
+USER ${non_root_user}    
+
+ENV USER=${non_root_user}
+
+WORKDIR ${HOME}
+
+ENV PATH=${PATH}:${HOME}/go/bin
 
 # Configuration des permissions correctes pour le dossier .ssh
-RUN mkdir /workspaces && \
-    chmod 707 /workspaces
+WORKDIR /workspaces 
+RUN chmod 707 .
 
 USER ${USER}
-ENV HOME=/home/${USER}
 
 # Configuration des permissions correctes pour le dossier .ssh
 RUN mkdir ${HOME}/.ssh && \
