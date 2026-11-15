@@ -7,10 +7,9 @@ services:
     image: ${IMAGE:-dbndev/ssh-bridge}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./authorized_keys:/home/debian/.ssh/authorized_keys
       - /workspaces:/workspaces
       - ${PWD}:${PWD}:cached
-      - /dev:/dev
+      - ${PWD}/.containers/docker-ssh-bridge/ssh:/home/debian/.ssh:cached
       - vscode:/vscode
     working_dir: ${PWD}
     ports:
@@ -18,6 +17,8 @@ services:
       - ${VEGITO_DOCKER_BRIDGE_PORT:-23750}:2375
     container_name: ssh-server
     environment:
+      CONTAINER_CACHE: ${PWD}/.containers/docker-ssh-bridge
+      WORKING_DIR: ${PWD}
       SSH_PUBLIC_KEY: /home/debian/.ssh/authorized_keys
 
       VSCODE_SERVER_COMMIT: ${VSCODE_SERVER_COMMIT:-93cfdd489c3b228840d0f86ec77c3636277c93ea}
@@ -45,6 +46,8 @@ services:
       - ${VEGITO_DNS_SERVER:-1.1.1.1}
 
 volumes:
+  # ssh-config:
+  #   driver: local
   vscode:
     external: true
     name: vscode
