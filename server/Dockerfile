@@ -1,5 +1,5 @@
-ARG go=registry-public.vegito.app/vegito-app/vegito-docker:trixie-debian-golang-v0.0.16
-ARG debian=registry-public.vegito.app/vegito-app/vegito-docker:trixie-debian-project-golang-docker-v0.0.16
+ARG go=registry-public.vegito.app/vegito-app/vegito-docker:trixie-debian-golang-v0.0.22
+ARG debian=registry-public.vegito.app/vegito-app/vegito-docker:trixie-debian-project-golang-docker-v0.0.22
 FROM ${go} AS go-build
 ARG debian_version=trixie
 ARG TARGETPLATFORM
