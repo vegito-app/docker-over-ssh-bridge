@@ -11,6 +11,8 @@ services:
       - ${PWD}:${PWD}:cached
       - ${PWD}/.containers/docker-ssh-bridge/ssh:/home/debian/.ssh:cached
       - vscode:/vscode
+    devices:
+      - /dev/kvm
     working_dir: ${PWD}
     ports:
       - ${VEGITO_SSH_BRIDGE_PORT:-22022}:22
