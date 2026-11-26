@@ -82,6 +82,8 @@ generate_ssh_env() {
     {
         echo "VEGITO_PROJECT_USER=${VEGITO_PROJECT_USER:-}"
         
+        echo "KVM_GID=${KVM_GID:-}"
+        
         echo "VEGITO_DNS_SERVER=${VEGITO_DNS_SERVER:-}"
         
         echo "VEGITO_STRIPE_DEBUG_KEY=${VEGITO_STRIPE_DEBUG_KEY:-}"
